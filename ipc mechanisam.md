@@ -352,3 +352,21 @@ int main()
         shmdt(shm_mem);
 }
 ```
+## 57. Write a C program that uses semget to create a new semaphore set 
+```c
+#include<stdio.h>
+#include<sys/sem.h>
+#include<sys/ipc.h>
+#include<stdlib.h>
+int main()
+{
+        int key=ftok("semfile",65);
+        int semid=semget(key,1,IPC_CREAT|0666);
+        if(semid<0)
+        {
+                printf("semaphore not created\n");
+                exit(1);
+        }
+        printf("semaphore created successfully-%d\n",semid);
+}
+```
