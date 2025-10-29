@@ -589,3 +589,83 @@ int main()
         }
 }
 ```
+## 54. Write a program to demonstrate error handling using signals in system calls. 
+```c
+#include <stdio.h>
+#include <signal.h>
+#include <unistd.h>
+#include <errno.h>
+#include <stdlib.h>
+void handler(int sig) {
+    printf("\nSIGINT received %d\n",getpid());
+}
+int main() {
+    char buf[100];
+    ssize_t n;
+    signal(SIGINT, handler);
+    printf("Press Ctrl+C while waiting for input:\n");
+    while (1) {
+        printf("Input: ");
+        fflush(stdout);
+        n = read(STDIN_FILENO, buf, sizeof(buf)-1);
+        if (n == -1) {
+            if (errno == EINTR) {
+                printf("\nread() interrupted by signal. Retrying...\n");
+                continue;
+            } else {
+                perror("read");
+                exit(1);
+            }
+        }
+        buf[n] = '\0';
+        printf("You entered: %s\n", buf);
+    }
+    return 0;
+}
+```
+## 55. Write a program to demonstrate signal handling in a client-server architecture. 
+```c
+#include<stdio.h>
+#include<unistd.h>
+#include<signal.h>
+#include<stdlib.h>
+int main(int argc,char *arg[])
+{
+        if(argc!=2)
+        {
+                printf(" enter %s %d\n",arg[0],getpid());
+                exit(1);
+        }
+        int serverpid=atoi(arg[1]);
+        if(serverpid<0)
+        {
+                printf("less");
+        }
+        printf("%d server pid \n",serverpid);
+        if(kill(serverpid,SIGUSR1)<0)
+        {
+                perror("kill");
+                return 1;
+        }
+}
+//server
+#include<stdio.h>
+#include<unistd.h>
+#include<signal.h>
+#include<stdlib.h>
+void handler(int sig)
+{
+        printf("SIGUSR1 id is %d\n",getpid());
+        exit(0);
+}
+int main()
+{
+        signal(SIGUSR1,handler);
+        printf("%di\n",getpid());
+        while(1)
+        {
+                sleep(1);
+        }
+
+}
+```
