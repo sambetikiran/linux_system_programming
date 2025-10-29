@@ -457,3 +457,49 @@ int main() {
     return 0;
 }
 ```
+## 55. Write a program to demonstrate signal handling in a client-server architecture. 
+```c
+#include<stdio.h>
+#include<unistd.h>
+#include<signal.h>
+#include<stdlib.h>
+int main(int argc,char *arg[])
+{
+        if(argc!=2)
+        {
+                printf(" enter %s %d\n",arg[0],getpid());
+                exit(1);
+        }
+        int serverpid=atoi(arg[1]);
+        if(serverpid<0)
+        {
+                printf("less");
+        }
+        printf("%d server pid \n",serverpid);
+        if(kill(serverpid,SIGUSR1)<0)
+        {
+                perror("kill");
+                return 1;
+        }
+}
+//server
+#include<stdio.h>
+#include<unistd.h>
+#include<signal.h>
+#include<stdlib.h>
+void handler(int sig)
+{
+        printf("SIGUSR1 id is %d\n",getpid());
+        exit(0);
+}
+int main()
+{
+        signal(SIGUSR1,handler);
+        printf("%di\n",getpid());
+        while(1)
+        {
+                sleep(1);
+        }
+
+}
+```
