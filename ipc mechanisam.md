@@ -422,3 +422,38 @@ int main()
         semop(semid,&smop,1);
         printf("message receiviec from client %s \n",shmptr);
 }
+```
+## 54. Write a program to demonstrate error handling using signals in system calls. 
+```c
+#include <stdio.h>
+#include <signal.h>
+#include <unistd.h>
+#include <errno.h>
+#include <stdlib.h>
+void handler(int sig) {
+    printf("\nSIGINT received %d\n",getpid());
+}
+int main() {
+    char buf[100];
+    ssize_t n;
+    signal(SIGINT, handler);
+    printf("Press Ctrl+C while waiting for input:\n");
+    while (1) {
+        printf("Input: ");
+        fflush(stdout);
+        n = read(STDIN_FILENO, buf, sizeof(buf)-1);
+        if (n == -1) {
+            if (errno == EINTR) {
+                printf("\nread() interrupted by signal. Retrying...\n");
+                continue;
+            } else {
+                perror("read");
+                exit(1);
+            }
+        }
+        buf[n] = '\0';
+        printf("You entered: %s\n", buf);
+    }
+    return 0;
+}
+```
