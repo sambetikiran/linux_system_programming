@@ -370,3 +370,55 @@ int main()
         printf("semaphore created successfully-%d\n",semid);
 }
 ```
+## 60. Write a program that combines semaphores and shared memory for synchronization between processes. 
+```c
+//client
+#include<stdio.h>
+#include<sys/ipc.h>
+#include<sys/wait.h>
+#include<sys/types.h>
+#include<sys/shm.h>
+#include<sys/sem.h>
+#include<stdlib.h>
+#define SHM_KEY 1220
+#define SEM_KEY 1221
+int main()
+{
+        int shmid,semid;
+        shmid=shmget(SHM_KEY,512,0);
+        char *shmptr=shmat(shmid,NULL,0);
+        printf("enter the input");
+        scanf("%s",shmptr);
+        semid=semget(SEM_KEY,2,IPC_CREAT|0666);
+        struct sembuf smop;
+        smop.sem_num=0;
+        smop.sem_op=1;
+        smop.sem_flg=0;
+        semop(semid,&smop,1);
+        printf("messge is sent to server");
+}
+//server
+#include<stdio.h>
+#include<stdlib.h>
+#include<sys/sem.h>
+#include<sys/ipc.h>
+#include<sys/shm.h>
+#include<sys/wait.h>
+#include<sys/types.h>
+#define SHM_KEY 1220
+#define SEM_KEY 1221
+int main()
+{
+        int shmid,semid;
+        shmid=shmget(SHM_KEY,512,IPC_CREAT|0666);
+        char *shmptr=shmat(shmid,NULL,0);
+        semid=semget(SEM_KEY,2,IPC_CREAT|0666);
+        semctl(semid,0,SETVAL,0);
+        semctl(semid,1,SETVAL,0);
+        struct sembuf smop;
+        smop.sem_num=0;
+        smop.sem_op=-1;
+        smop.sem_flg=0;
+        semop(semid,&smop,1);
+        printf("message receiviec from client %s \n",shmptr);
+}
