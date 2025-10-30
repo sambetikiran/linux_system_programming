@@ -456,7 +456,7 @@ int main()
         }
 }
 ```
-## /67. Implement a program where multiple child processes are created, and each child process communicates with the parent process using pipes. 
+## 67. Implement a program where multiple child processes are created, and each child process communicates with the parent process using pipes. 
 ```c
 #include<stdio.h>
 #include<stdlib.h>
@@ -501,6 +501,53 @@ int main()
         for(int i=0;i<num;i++)
         {
                 wait(NULL);
+        }
+}
+```
+## 68. Develop a program that uses pipes for bidirectional communication between two processes, where each process can send and receive messages. 
+```c
+#include<stdio.h>
+#include<stdlib.h>
+#include<unistd.h>
+#include<string.h>
+int main()
+{
+        int fd1[2];
+        int fd2[2];
+        pipe(fd1);
+        pipe(fd2);
+        int pid=fork();
+        if(pid==0)
+        {
+                close(fd1[1]);
+                char buf[100];
+                printf("child is recving-%d\n",getpid());
+                read(fd1[0],buf,sizeof(buf));
+                printf("pid=%d of output is %s\n",getpid(),buf);
+                close(fd1[0]);
+                sleep(2);
+                close(fd2[0]);
+                char wrt[100];
+                printf("enter the input\n");
+                scanf("%s",wrt);
+                write(fd2[1],wrt,sizeof(wrt));
+                close(fd2[1]);
+        }
+        else
+        {
+                close(fd1[0]);
+                char wrt[100];
+                printf("enter the input\n");
+                scanf("%s",wrt);
+                write(fd1[1],wrt,sizeof(wrt));
+                close(fd1[1]);
+                sleep(2);
+                close(fd2[1]);
+                char buf[100];
+                printf("child is recving-%d\n",getpid());
+                read(fd2[0],buf,sizeof(buf));
+                printf("pid=%d of output is %s\n",getpid(),buf);
+                close(fd2[0]);
         }
 }
 ```
