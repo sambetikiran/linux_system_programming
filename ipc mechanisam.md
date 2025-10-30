@@ -423,4 +423,84 @@ int main()
         printf("message receiviec from client %s \n",shmptr);
 }
 ```
-
+## 66. Write a C program to create a pipe and pass an array of integers from the parent process to the child process through the pipe.
+```c
+#include<stdio.h>
+#include<stdlib.h>
+#include<unistd.h>
+int main()
+{
+        int fd[2];
+        pipe(fd);
+        int rbuf[100];
+        int arr[6]={1,2,3,4,5,6};
+        int pid=fork();
+        if(pid>0)
+        {
+                close(fd[0]);
+                printf("parent is sending to child \n");
+                int ret=write(fd[1],arr,sizeof(arr));
+                close(fd[1]);
+        }
+        else
+        {
+                close(fd[1]);
+                printf("child is recieved from parent\n");
+                int ret=read(fd[0],rbuf,sizeof(rbuf));
+                for(int i=0;i<6;i++)
+                {
+                        printf("%d\t",rbuf[i]);
+                }
+                printf("\n");
+                close(fd[0]);
+        }
+}
+```
+## /67. Implement a program where multiple child processes are created, and each child process communicates with the parent process using pipes. 
+```c
+#include<stdio.h>
+#include<stdlib.h>
+#include<unistd.h>
+#include<string.h>
+#include<sys/wait.h>
+int main()
+{
+        int num;
+        printf("enter the no.of child want to create\n");
+        scanf("%d",&num);
+        int fd[num][2];
+        char buf1[100];
+        printf("enter the string");
+        scanf("%s",buf1);
+        for(int i=0;i<num;i++)
+        {
+                pipe(fd[i]);
+        }
+        for(int i=0;i<num;i++)
+        {
+                char buf[100];
+                int pid=fork();
+                if(pid==0)
+                {
+                        close(fd[i][1]);
+                        int ret=read(fd[i][0],buf,sizeof(buf));
+                        printf("%d child output= %s\n",i,buf);
+                        close(fd[i][0]);
+                        exit(0);
+                }
+        }
+        for(int i=0;i<num;i++)
+        {
+                for(int i=0;i<num;i++)
+                {
+                        close(fd[i][0]);
+                        int ret=write(fd[i][1],buf1,sizeof(buf1));
+                        close(fd[i][1]);
+                }
+        }
+        for(int i=0;i<num;i++)
+        {
+                wait(NULL);
+        }
+}
+```
