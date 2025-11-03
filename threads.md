@@ -716,3 +716,51 @@ int main()
         close(sd);
 }
 ```
+## 38.Write a C program to create a thread that sorts an array of strings? 
+```c
+#include<stdio.h>
+#include<string.h>
+#include<pthread.h>
+#include<stdlib.h>
+pthread_mutex_t lock;
+void *create(void *arg)
+{
+        char *str=(char*)arg;
+        int len=strlen(str);
+        pthread_mutex_lock(&lock);
+        for(int i=0;i<len;i++)
+        {
+                for(int j=i+1;j<len;j++)
+                {
+                        if(str[i]>str[j])
+                        {
+                                char temp=str[i];
+                                str[i]=str[j];
+                                str[j]=temp;
+                        }
+                }
+        }
+        pthread_mutex_unlock(&lock);
+}
+void *result(void *arg)
+{
+        char *str=(char*)arg;
+        int len=strlen(str);
+        pthread_mutex_lock(&lock);
+        printf("%s\n",str);
+        pthread_mutex_unlock(&lock);
+}
+int main()
+{
+        pthread_mutex_init(&lock,NULL);
+        pthread_t p1,p2;
+        char str[100];
+        printf("enter the string");
+        scanf("%s",str);
+        pthread_create(&p1,NULL,create,&str);
+        pthread_create(&p2,NULL,result,&str);
+        pthread_join(p1,NULL);
+        pthread_join(p2,NULL);
+        pthread_mutex_destroy(&lock);
+}
+```
